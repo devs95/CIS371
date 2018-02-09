@@ -25,11 +25,11 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [10:0] imm11 = i_insn[10:0];
 	
 	//sign extended signed immediate values
-	wire [15:0] sx_imm5 = {11{imm5[4]}, imm5};
-	wire [15:0] sx_imm6 = {10{imm5[5]}, imm6};
-	wire [15:0] sx_imm7 = {9{imm5[6]}, imm7};
-	wire [15:0] sx_imm9 = {7{imm5[8]}, imm9};
-	wire [15:0] sx_imm11 = {5{imm5[10]}, imm11};
+	wire [15:0] sx_imm5 = {{11{imm5[4]}}, imm5};
+	wire [15:0] sx_imm6 = {{10{imm6[5]}}, imm6};
+	wire [15:0] sx_imm7 = {{9{imm5[6]}}, imm7};
+	wire [15:0] sx_imm9 = {{7{imm5[8]}}, imm9};
+	wire [15:0] sx_imm11 = {{5{imm5[10]}}, imm11};
 	
 	//unsigned immediate values
 	wire [3:0] uimm4 = i_insn[3:0];
@@ -50,7 +50,7 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire is_ldr = (op == 4'h6) ? 1'b1 : 1'b0;
 	wire is_str = (op == 4'h7) ? 1'b1 : 1'b0;
 	wire is_rti = (op == 4'h8) ? 1'b1 : 1'b0;
-	wire is_trap = (op == 4'h15) ? 1'b1 : 1'b0;
+	wire is_trap = (op == 4'hF) ? 1'b1 : 1'b0;
 	wire is_const = (op == 4'h9) ? 1'b1: 1'b0;
 	wire is_hiconst = (op == 4'hD) ? 1'b1 : 1'b0;
 	
@@ -67,7 +67,8 @@ module lc4_alu(input  wire [15:0] i_insn,
 							(func0 == 3'h1) ? o_mul :
 							(func0 == 3'h2) ? o_sub :
 							(func0 == 3'h3) ? o_div :
-							(func0[2] == 3'b1) ? o_addi;
+							(func0[2] == 3'b1) ? o_addi :
+							16'h0000;
 
 /***	LOGIC		***/										
 	//logical op computations						
@@ -81,7 +82,8 @@ module lc4_alu(input  wire [15:0] i_insn,
 							(func0 == 3'h1) ? o_not :
 							(func0 == 3'h2) ? o_or :
 							(func0 == 3'h3) ? o_xor :
-							(func0[2] == 3'b1) ? o_andi;
+							(func0[2] == 3'b1) ? o_andi :
+							16'h0000;
 
 /***	COMPARE		***/							
 	// MUST DO COMPARE COMPUTATIONS
@@ -102,7 +104,8 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [15:0] o_shift = 		(func0[2:1] == 2'h0) ? o_sll :
 								(func0[2:1] == 2'h1) ? o_sra :
 								(func0[2:1] == 2'h2) ? o_srl :
-								(func0[2:1] == 2'h3) ? o_mod;
+								(func0[2:1] == 2'h3) ? o_mod :
+								16'h0000;
 
 /***	BRANCH		***/								
 	//branch op computations
