@@ -57,7 +57,7 @@ module lc4_alu(input  wire [15:0] i_insn,
 	//Set DIV, MOD, and SRA with external modules
 	wire [15:0] o_div, o_mod, o_sra;
 	lc4_divider(.i_dividend(i_r1data), .i_divisor(i_r2data), .o_remainder(o_mod), .o_quotient(o_div));
-	barrel_shift(.in(i_r1data), .uimm4(uimm4), .out(o_sra));
+	barrel_shift(.shift_in(i_r1data), .shift_amt(uimm4), .shift_out(o_sra));
 	
 	
 /***	ARITHMETIC	***/		
@@ -162,13 +162,13 @@ module lc4_alu(input  wire [15:0] i_insn,
 						16'h0000;
 endmodule
 
-module barrel_shift(input wire [15:0] in,
-					input wire [3:0] uimm4,
-					output wire [15:0] out);
+module barrel_shift(input wire [15:0] shift_in,
+					input wire [3:0] shift_amt,
+					output wire [15:0] shift_out);
 	
-	wire [15:0] shift1 = uimm4[0] ? {{1{in[15]}},in[15:1]} : in;
-	wire [15:0] shift2 = uimm4[1] ? {{2{in[15]}},in[15:2]} : shift1;
-	wire [15:0] shift4 = uimm4[2] ? {{4{in[15]}},in[15:4]} : shift2;
-	wire [15:0] out = uimm4[3] ? {{8{in[15]}},in[15:8]} : shift2;
+	wire [15:0] shift1 = shift_amt[0] ? {{1{shift_in[15]}}, shift_in[15:1]} : shift_in;
+	wire [15:0] shift2 = shift_amt[1] ? {{2{shift1[15]}}, shift1[15:2]} : shift1;
+	wire [15:0] shift4 = shift_amt[2] ? {{4{shift2[15]}}, shift2[15:4]} : shift2;
+	assign shift_out = shift_amt[3] ? {{8{shift4[15]}}, shift4[15:8]} : shift4;
 					
 end module					
