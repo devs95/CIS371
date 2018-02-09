@@ -31,13 +31,15 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [15:0] sx_imm9 = {{7{imm9[8]}}, imm9};
 	wire [15:0] sx_imm11 = {{5{imm11[10]}}, imm11};
 	
+	
 	//unsigned immediate values
 	wire [3:0] uimm4 = i_insn[3:0];
 	//wire [15:0] uimm7 = i_insn[6:0]}; 
 	wire [7:0] uimm8 = i_insn[7:0];
 	
-	//zero extended
+	//zero extended values
 	wire [15:0] zx_uimm8 = {8'h00, uimm8};
+	wire [15:0] zx_imm11 = {5'h0, imm11};
 	
 	//op-code control signals
 	wire is_arith = (op == 4'h1) ? 1'b1 : 1'b0;
@@ -56,8 +58,8 @@ module lc4_alu(input  wire [15:0] i_insn,
 	
 	//Set DIV, MOD, and SRA with external modules
 	wire [15:0] o_div, o_mod, o_sra;
-	lc4_divider(.i_dividend(i_r1data), .i_divisor(i_r2data), .o_remainder(o_mod), .o_quotient(o_div));
-	barrel_shift(.shift_in(i_r1data), .shift_amt(uimm4), .shift_out(o_sra));
+	lc4_divider alu_div(.i_dividend(i_r1data), .i_divisor(i_r2data), .o_remainder(o_mod), .o_quotient(o_div));
+	barrel_shift alu_shift(.shift_in(i_r1data), .shift_amt(uimm4), .shift_out(o_sra));
 	
 	
 /***	ARITHMETIC	***/		
@@ -129,7 +131,7 @@ module lc4_alu(input  wire [15:0] i_insn,
 /***	JUMP-SUB	***/	
 	//jump to sub op computations
 	wire [15:0] o_jsrr = i_r1data;
-	wire [15:0] o_jsr = (i_pc & 16'h8000) | (sx_imm11 << 4);
+	wire [15:0] o_jsr = (i_pc & 16'h8000) | (zx_imm11 << 4);
 	//jump to sub op muxing	
 	wire [15:0] o_jump_sub = (func2 == 1'b0) ? o_jsrr : o_jsr;
 	
@@ -171,4 +173,4 @@ module barrel_shift(input wire [15:0] shift_in,
 	wire [15:0] shift4 = shift_amt[2] ? {{4{shift2[15]}}, shift2[15:4]} : shift2;
 	assign shift_out = shift_amt[3] ? {{8{shift4[15]}}, shift4[15:8]} : shift4;
 					
-end module					
+endmodule					
