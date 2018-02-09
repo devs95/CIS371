@@ -54,13 +54,17 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire is_const = (op == 4'h9) ? 1'b1: 1'b0;
 	wire is_hiconst = (op == 4'hD) ? 1'b1 : 1'b0;
 	
+	//Set DIV, MOD, and SRA with external modules
+	lc4_divider(.i_dividend(i_r1data), .i_divisor(i_r2data), .o_remainder(o_mod), .o_quotient(o_div));
+	barrel_shift(.in(i_r1data), .uimm4(uimm4), .out(o_sra));
+	
 	
 /***	ARITHMETIC	***/		
 	//arithmetic op computations
 	wire [15:0] o_add = i_r1data + i_r2data;
 	wire [15:0] o_mul = i_r1data * i_r2data;
 	wire [15:0] o_sub = i_r1data - i_r2data;
-	wire [15:0] o_div = 16'hFFFF; //TO DO
+	//wire [15:0] o_div = 16'hFFFF; //TO DO
 	wire [15:0] o_addi = i_r1data + sx_imm5;
 	//arithmetic op muxing
 	wire [15:0] o_arith = 	(func0 == 3'h0) ? o_add :
@@ -97,9 +101,9 @@ module lc4_alu(input  wire [15:0] i_insn,
 								
 /***	SHIFT		***/
 	wire [15:0] o_sll = i_r1data << uimm4;
-	wire [15:0] o_sra = 16'hFFFF; //TO DO
+	//wire [15:0] o_sra = 16'hFFFF; //TO DO
 	wire [15:0] o_srl = i_r1data >> uimm4;
-	wire [15:0] o_mod = 16'hFFFF; //TO DO
+	//wire [15:0] o_mod = 16'hFFFF; //TO DO
 	//shift op muxing							
 	wire [15:0] o_shift = 		(func0[2:1] == 2'h0) ? o_sll :
 								(func0[2:1] == 2'h1) ? o_sra :
@@ -124,7 +128,7 @@ module lc4_alu(input  wire [15:0] i_insn,
 /***	JUMP-SUB	***/	
 	//jump to sub op computations
 	wire [15:0] o_jsrr = i_r1data;
-	wire [15:0] o_jsr = (i_pc & 16'h8000) | (sx_imm11 << 11);
+	wire [15:0] o_jsr = (i_pc & 16'h8000) | (sx_imm11 << 4);
 	//jump to sub op muxing	
 	wire [15:0] o_jump_sub = (func2 == 1'b0) ? o_jsrr : o_jsr;
 	
@@ -156,3 +160,14 @@ module lc4_alu(input  wire [15:0] i_insn,
 						is_hiconst ? o_hiconst :
 						16'h0000;
 endmodule
+
+module barrel_shift(input wire [15:0] in,
+					input wire [3:0] uimm4,
+					output wire [15:0] out);
+	
+	wire [15:0] shift1 = uimm4[0] ? {{1{in[15]}},in[15:1]} : in;
+	wire [15:0] shift2 = uimm4[1] ? {{2{in[15]}},in[15:2]} : shift1;
+	wire [15:0] shift4 = uimm4[2] ? {{4{in[15]}},in[15:4]} : shift2;
+	wire [15:0] out = uimm4[3] ? {{8{in[15]}},in[15:8]} : shift2;
+					
+end module					
