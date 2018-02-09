@@ -55,6 +55,7 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire is_hiconst = (op == 4'hD) ? 1'b1 : 1'b0;
 	
 	//Set DIV, MOD, and SRA with external modules
+	wire [15:0] o_div, o_mod, o_sra;
 	lc4_divider(.i_dividend(i_r1data), .i_divisor(i_r2data), .o_remainder(o_mod), .o_quotient(o_div));
 	barrel_shift(.in(i_r1data), .uimm4(uimm4), .out(o_sra));
 	
