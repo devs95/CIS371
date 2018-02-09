@@ -27,9 +27,9 @@ module lc4_alu(input  wire [15:0] i_insn,
 	//sign extended signed immediate values
 	wire [15:0] sx_imm5 = {{11{imm5[4]}}, imm5};
 	wire [15:0] sx_imm6 = {{10{imm6[5]}}, imm6};
-	wire [15:0] sx_imm7 = {{9{imm5[6]}}, imm7};
-	wire [15:0] sx_imm9 = {{7{imm5[8]}}, imm9};
-	wire [15:0] sx_imm11 = {{5{imm5[10]}}, imm11};
+	wire [15:0] sx_imm7 = {{9{imm7[6]}}, imm7};
+	wire [15:0] sx_imm9 = {{7{imm9[8]}}, imm9};
+	wire [15:0] sx_imm11 = {{5{imm11[10]}}, imm11};
 	
 	//unsigned immediate values
 	wire [3:0] uimm4 = i_insn[3:0];
