@@ -10,12 +10,18 @@ module lc4_alu(input  wire [15:0] i_insn,
                input wire [15:0]  i_r2data,
                output wire [15:0] o_result);
 
-
+	//instruction operation/function codes
 	wire [3:0] op = i_insn[15:12];
 	wire [2:0] func0 = i_insn[5:3];
 	wire [1:0] func1 = i_insn[8:7];
 	wire func2 = i_insn[11];
 	wire [2:0] func3 = i_insn[11:9];
+	
+	//17-bit extended register values for comparison ops
+	wire [16:0] zx_r1 = {1'b0, i_r1data};
+	wire [16:0] sx_r1 = {{1{i_r1data[15]}}, i_r1data};
+	wire [16:0] zx_r2 = {1'b0, i_r2data};
+	wire [16:0] sx_r2 = {{1{i_r2data[15]}}, i_r2data};
 	
 	//signed immediate values
 	wire [4:0] imm5 = i_insn[4:0];
@@ -28,17 +34,18 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [15:0] sx_imm5 = {{11{imm5[4]}}, imm5};
 	wire [15:0] sx_imm6 = {{10{imm6[5]}}, imm6};
 	wire [15:0] sx_imm7 = {{9{imm7[6]}}, imm7};
+	wire [16:0] sx17_imm7 = {{10{imm7[6]}}, imm7};
 	wire [15:0] sx_imm9 = {{7{imm9[8]}}, imm9};
 	wire [15:0] sx_imm11 = {{5{imm11[10]}}, imm11};
 	
 	
 	//unsigned immediate values
 	wire [3:0] uimm4 = i_insn[3:0];
-	//wire [15:0] uimm7 = i_insn[6:0]}; 
 	wire [7:0] uimm8 = i_insn[7:0];
 	
-	//zero extended values
-	wire [15:0] zx_uimm8 = {8'h00, uimm8};
+	//zero extended immediate values
+	wire [16:0] zx17_uimm7 = {10'h0, imm7};
+	wire [15:0] zx_uimm8 = {8'h0, uimm8};
 	wire [15:0] zx_imm11 = {5'h0, imm11};
 	
 	//op-code control signals
@@ -92,21 +99,23 @@ module lc4_alu(input  wire [15:0] i_insn,
 							(func0[2] == 3'b1) ? o_andi :
 							16'h0000;
 
-/***	COMPARE		***/							
-	// MUST DO COMPARE COMPUTATIONS
+/***	COMPARE		***/
+	//compare op computations
+	wire [15:0] o_cmp, o_cmpu, o_cmpi, o_cmpiu;
+	lc4_comparator lc4_cmp_cmp(.cmp_in1(sx_r1), .cmp_in2(sx_r2), .o_NZP(o_cmp));
+	lc4_comparator lc4_cmp_cmpu(.cmp_in1(zx_r1), .cmp_in2(zx_r2), .o_NZP(o_cmpu));
+	lc4_comparator lc4_cmp_cmpi(.cmp_in1(sx_r1), .cmp_in2(sx17_imm7), .o_NZP(o_cmpi));
+	lc4_comparator lc4_cmp_cmpiu(.cmp_in1(zx_r1), .cmp_in2(zx17_uimm7), .o_NZP(o_cmpiu));
 	//compare op muxing
-	/*
 	wire [15:0] o_compare = 	(func1 == 2'h0 ? o_cmp :
 								(func1 == 2'h1) ? o_cmpu :
 								(func1 == 2'h2) ? o_cmpi :
-								(func1 == 2'h3) ? o_cmpiu;*/
-	wire [15:0] o_compare = 16'hFFFF;							
+								(func1 == 2'h3) ? o_cmpiu;							
 								
 /***	SHIFT		***/
+	//shift op computations
 	wire [15:0] o_sll = i_r1data << uimm4;
-	//wire [15:0] o_sra = 16'hFFFF; //TO DO
 	wire [15:0] o_srl = i_r1data >> uimm4;
-	//wire [15:0] o_mod = 16'hFFFF; //TO DO
 	//shift op muxing							
 	wire [15:0] o_shift = 		(func0[2:1] == 2'h0) ? o_sll :
 								(func0[2:1] == 2'h1) ? o_sra :
@@ -116,15 +125,15 @@ module lc4_alu(input  wire [15:0] i_insn,
 
 /***	BRANCH		***/								
 	//branch op computations
-	wire [15:0] o_nop = i_pc + 16'h1;
-	wire [15:0] o_br = i_pc + sx_imm9;
+	wire [15:0] o_nop = i_pc + 16'h1 + sx_imm9;
+	wire [15:0] o_br = i_pc + 16'h1 + sx_imm9;
 	//branch op muxing
 	wire [15:0] o_branch = (func3 == 3'h0) ? o_nop : o_br; 
 	
 /***	JUMP		***/								
 	//jump op computations
 	wire [15:0] o_jmpr = i_r1data;
-	wire [15:0] o_jmp = i_pc + 1 + sx_imm11;
+	wire [15:0] o_jmp = i_pc + 16'h1 + sx_imm11;
 	//jump op muxing	
 	wire [15:0] o_jump = (func2 == 1'b0) ? o_jmpr : o_jmp;
 	
@@ -148,10 +157,10 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [15:0] o_hiconst = (i_r1data & 16'hFF) | (zx_uimm8 << 8);
 	
 	//final output muxing
-	assign o_result = 	is_arith ? o_arith : //div
+	assign o_result = 	is_arith ? o_arith :
 						is_log ? o_log :
 						is_compare ? o_compare : //all
-						is_shift ? o_shift : //sra, mod
+						is_shift ? o_shift :
 						is_branch ? o_branch : 
 						is_jump ? o_jump :
 						is_jump_sub ? o_jump_sub :
@@ -173,4 +182,15 @@ module barrel_shift(input wire [15:0] shift_in,
 	wire [15:0] shift4 = shift_amt[2] ? {{4{shift2[15]}}, shift2[15:4]} : shift2;
 	assign shift_out = shift_amt[3] ? {{8{shift4[15]}}, shift4[15:8]} : shift4;
 					
+endmodule			
+
+module lc4_comparator(	input wire [16:0] cmp_in1,
+					input wire [16:0] cmp_in2,
+					output wire [15:0] o_NZP);
+					
+	wire [16:0] sub_result = cmp_in1 - cmp_in2;
+	assign o_NZP = 	&~(sub_result) ? 0 :
+					sub_result[16] ? 16'hFF :
+					16'h0001;
+	
 endmodule					
