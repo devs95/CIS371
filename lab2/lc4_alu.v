@@ -107,10 +107,11 @@ module lc4_alu(input  wire [15:0] i_insn,
 	lc4_comparator lc4_cmp_cmpi(.cmp_in1(sx_r1), .cmp_in2(sx17_imm7), .o_NZP(o_cmpi));
 	lc4_comparator lc4_cmp_cmpiu(.cmp_in1(zx_r1), .cmp_in2(zx17_uimm7), .o_NZP(o_cmpiu));
 	//compare op muxing
-	wire [15:0] o_compare = 	(func1 == 2'h0 ? o_cmp :
+	wire [15:0] o_compare = 	(func1 == 2'h0) ? o_cmp :
 								(func1 == 2'h1) ? o_cmpu :
 								(func1 == 2'h2) ? o_cmpi :
-								(func1 == 2'h3) ? o_cmpiu;							
+								(func1 == 2'h3) ? o_cmpiu :
+								16'h0000;	
 								
 /***	SHIFT		***/
 	//shift op computations
@@ -189,8 +190,8 @@ module lc4_comparator(	input wire [16:0] cmp_in1,
 					output wire [15:0] o_NZP);
 					
 	wire [16:0] sub_result = cmp_in1 - cmp_in2;
-	assign o_NZP = 	&~(sub_result) ? 0 :
-					sub_result[16] ? 16'hFF :
+	assign o_NZP = 	(&(~(sub_result))): ? 0 :
+					sub_result[16] ? 16'hFFFF :
 					16'h0001;
 	
 endmodule					
