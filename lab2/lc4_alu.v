@@ -48,20 +48,20 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [15:0] zx_uimm8 = {8'h0, uimm8};
 	wire [15:0] zx_imm11 = {5'h0, imm11};
 	
-	//op-code control signals
-	wire is_arith = (op == 4'h1) ? 1'b1 : 1'b0;
-	wire is_log = (op == 4'h5) ? 1'b1 : 1'b0;
-	wire is_compare = (op == 4'h2) ? 1'b1 : 1'b0;
-	wire is_shift = (op == 4'hA) ? 1'b1 : 1'b0;
-	wire is_branch = (op == 4'h0) ? 1'b1 : 1'b0;
-	wire is_jump = (op == 4'hC) ? 1'b1 : 1'b0;
-	wire is_jump_sub = (op == 4'h4) ? 1'b1 : 1'b0;
-	wire is_ldr = (op == 4'h6) ? 1'b1 : 1'b0;
-	wire is_str = (op == 4'h7) ? 1'b1 : 1'b0;
-	wire is_rti = (op == 4'h8) ? 1'b1 : 1'b0;
-	wire is_trap = (op == 4'hF) ? 1'b1 : 1'b0;
-	wire is_const = (op == 4'h9) ? 1'b1: 1'b0;
-	wire is_hiconst = (op == 4'hD) ? 1'b1 : 1'b0;
+	//op-code control signals for final mux
+	wire is_arith = (op == 4'h1);
+	wire is_log = (op == 4'h5); 
+	wire is_compare = (op == 4'h2); 
+	wire is_shift = (op == 4'hA); 
+	wire is_branch = (op == 4'h0);
+	wire is_jump = (op == 4'hC);
+	wire is_jump_sub = (op == 4'h4);
+	wire is_ldr = (op == 4'h6);
+	wire is_str = (op == 4'h7);
+	wire is_rti = (op == 4'h8);
+	wire is_trap = (op == 4'hF);
+	wire is_const = (op == 4'h9);
+	wire is_hiconst = (op == 4'hD);
 	
 	//Set DIV, MOD, and SRA with external modules
 	wire [15:0] o_div, o_mod, o_sra;
@@ -129,21 +129,21 @@ module lc4_alu(input  wire [15:0] i_insn,
 	wire [15:0] o_nop = i_pc + 16'h1 + sx_imm9;
 	wire [15:0] o_br = i_pc + 16'h1 + sx_imm9;
 	//branch op muxing
-	wire [15:0] o_branch = (func3 == 3'h0) ? o_nop : o_br; 
+	wire [15:0] o_branch = func3 ? o_br : o_nop; 
 	
 /***	JUMP		***/								
 	//jump op computations
 	wire [15:0] o_jmpr = i_r1data;
 	wire [15:0] o_jmp = i_pc + 16'h1 + sx_imm11;
 	//jump op muxing	
-	wire [15:0] o_jump = (func2 == 1'b0) ? o_jmpr : o_jmp;
+	wire [15:0] o_jump = func2 ? o_jmp : o_jmpr;
 	
 /***	JUMP-SUB	***/	
 	//jump to sub op computations
 	wire [15:0] o_jsrr = i_r1data;
 	wire [15:0] o_jsr = (i_pc & 16'h8000) | (zx_imm11 << 4);
 	//jump to sub op muxing	
-	wire [15:0] o_jump_sub = (func2 == 1'b0) ? o_jsrr : o_jsr;
+	wire [15:0] o_jump_sub = func2 ? o_jsr : o_jsrr;
 	
 /***	LDR/STR		***/
 	wire [15:0] o_ldr = i_r1data + sx_imm6;
@@ -190,7 +190,7 @@ module lc4_comparator(	input wire [16:0] cmp_in1,
 					output wire [15:0] o_NZP);
 					
 	wire [16:0] sub_result = cmp_in1 - cmp_in2;
-	assign o_NZP = 	(&(~(sub_result))): ? 0 :
+	assign o_NZP = 	(&(~(sub_result))) ? 16'h0 :
 					sub_result[16] ? 16'hFFFF :
 					16'h0001;
 	
