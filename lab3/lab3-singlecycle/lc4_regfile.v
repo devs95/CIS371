@@ -1,5 +1,5 @@
-/* TODO: name and PennKeys of all group members here
- *
+/* Dev Sharma - dsharm
+ * Jamaal Hay - jamaalh
  * lc4_regfile.v
  * Implements an 8-register register file parameterized on word size.
  *

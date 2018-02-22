@@ -1,4 +1,5 @@
-/* TODO: name and PennKeys of all group members here
+/* Dev Sharma - dsharm
+ * Jamaal Hay - jamaalh
  *
  * lc4_single.v
  * Implements a single-cycle data path
@@ -75,7 +76,7 @@ module lc4_processor
     //NZP Branch Logic
     wire br_e;
     //Decoder
-    wire r1re, r2re, regfile_we, nzp_we, is_load, is_store, is_branch, is_control_insn;
+    wire r1re, r2re, regfile_we, nzp_we, is_load, is_store, is_branch, is_control_insn, select_pc_plus_one;
     wire [2:0] r1_addr, r2_addr, rd_addr;
     //Regfile
     wire [15:0] r1_data, r2_data, rd_data;
@@ -94,13 +95,13 @@ module lc4_processor
     
     
     //Decoder
-    lc4_decoder decoder(.insn(i_cur_insn), .r1sel(r1_addr), .r1re(r1re), .r2sel(r2_addr), .r2re(r2re), .wsel(rd_addr), .regfile_we(regfile_we), .nzp_we(nzp_we), .select_pc_plus_one(),
+    lc4_decoder decoder(.insn(i_cur_insn), .r1sel(r1_addr), .r1re(r1re), .r2sel(r2_addr), .r2re(r2re), .wsel(rd_addr), .regfile_we(regfile_we), .nzp_we(nzp_we), .select_pc_plus_one(select_pc_plus_one),
                             .is_load(is_load), .is_store(is_store), .is_branch(is_branch), .is_control_insn(is_control_insn));
                             
     
     //Register File
-    assign rd_data = (is_load) ? i_cur_dmem_data : alu_result;
-    lc4_regfile regfile(.i_rd(rd_addr), .i_rs(r1_addr), .i_rt(r2_addr), .i_rd_we(regfile_we), .i_wdata(rd_data), .o_rs_data(r1_data), .o_rt_data(r2_data));
+    assign rd_data = (is_load) ? i_cur_dmem_data : (select_pc_plus_one) ? (pc+16'h1) : alu_result;
+    lc4_regfile regfile(.i_rd(rd_addr), .i_rs(r1_addr), .i_rt(r2_addr), .i_rd_we(regfile_we), .i_wdata(rd_data), .o_rs_data(r1_data), .o_rt_data(r2_data), .clk(clk) , .gwe(gwe), .rst(rst));
     
     //ALU
     lc4_alu alu(.i_insn(i_cur_insn), .i_pc(pc), .i_r1data(r1_data), .i_r2data(r2_data), .o_result(alu_result));
@@ -108,7 +109,7 @@ module lc4_processor
     //Memory
     assign dmem_addr = (is_load | is_store) ? alu_result : 16'h0;
     assign o_dmem_addr = dmem_addr;
-    assign o_dmem_towrite = r1_data;
+    assign o_dmem_towrite = r2_data;
     assign o_dmem_we = is_store;
     
     //PC
@@ -116,7 +117,7 @@ module lc4_processor
     assign o_cur_pc = pc;
     
     //Assign test bench signals
-    assign test_cur_pc = o_cur_pc;
+    assign test_cur_pc = pc;
     assign test_cur_insn = i_cur_insn;
     assign test_regfile_we = regfile_we;
     assign test_regfile_wsel = rd_addr;
@@ -125,7 +126,7 @@ module lc4_processor
     assign test_nzp_new_bits = nzp_in;
     assign test_dmem_we = is_store;
     assign test_dmem_addr = dmem_addr;
-    assign test_dmem_data = (is_store) ? r1_data : 16'h0;
+    assign test_dmem_data = (is_store) ? r2_data : (is_load) ? i_cur_dmem_data : 'h0;
 
 
 
@@ -159,10 +160,11 @@ module lc4_processor
       // Try adding a $display() call that prints out the PCs of
       // each pipeline stage in hex.  Then you can easily look up the
       // instructions in the .asm files in test_data.
-        $display("%d || PC = %h || test = %h", $time, pc, test_cur_pc);
-        $display("%d || alu_result = %h", $time, alu_result);
-        $display("%d || nzp_in = %b || test = %b", $time, nzp_in, test_nzp_new_bits);
-        $display("%d || nzp_we = %b || test = %b", $time, nzp_we, test_nzp_we);
+        //$display("%d || PC = %h || next_pc = %h || br_e = %b", $time, pc, next_pc, br_e);
+        //$display("%d || alu_result = %h", $time, alu_result);
+        //$display("%d || nzp_in = %b || test = %b", $time, nzp_in, test_nzp_new_bits);
+        //$display("%d || nzp_we = %b || test = %b", $time, nzp_we, test_nzp_we);
+        
         
       // basic if syntax:
       // if (cond) begin
@@ -204,9 +206,9 @@ module lc4_nzp_branch_logic(input wire [2:0] i_nzp, input wire [2:0] i_nzp_se, i
     wire p = i_nzp[0];
     
     wire o_br_e_tmp = (i_nzp_se == 3'h0) ? 1'h0 :
-                        (i_nzp_se == 3'h1) ? z :
-                        (i_nzp_se == 3'h2) ? p :
-                        (i_nzp_se == 3'h3) ? (p | z) :
+                        (i_nzp_se == 3'h1) ? p :
+                        (i_nzp_se == 3'h2) ? z :
+                        (i_nzp_se == 3'h3) ? (z | p) :
                         (i_nzp_se == 3'h4) ? n :
                         (i_nzp_se == 3'h5) ? (n | p) :
                         (i_nzp_se == 3'h6) ?  (n | z) :

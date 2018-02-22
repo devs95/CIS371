@@ -1,4 +1,6 @@
-/* TODO: name and PennKeys of all group members here */
+/* Dev Sharma - dsharm
+ * Jamaal Hay - jamaalh
+ */
 
 `timescale 1ns / 1ps
 
