@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Webtalk v2017.4 (64-bit)
+# SW Build 2086221 on Fri Dec 15 20:54:30 MST 2017
+# IP Build 2085800 on Fri Dec 15 22:25:07 MST 2017
+# Start of session at: Wed Feb 21 19:43:41 2018
+# Process ID: 15809
+# Current directory: /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile
+# Command line: wbtcv -mode batch -source /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/xsim.dir/snapshot.sim/webtalk/xsim_webtalk.tcl -notrace
+# Log file: /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/webtalk.log
+# Journal file: /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/webtalk.jou
+#-----------------------------------------------------------
+source /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/xsim.dir/snapshot.sim/webtalk/xsim_webtalk.tcl -notrace

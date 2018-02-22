@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# xsim v2017.4 (64-bit)
+# SW Build 2086221 on Fri Dec 15 20:54:30 MST 2017
+# IP Build 2085800 on Fri Dec 15 22:25:07 MST 2017
+# Start of session at: Wed Feb 21 19:43:44 2018
+# Process ID: 15868
+# Current directory: /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile
+# Command line: xsim -mode tcl -source {xsim.dir/snapshot.sim/xsim_script.tcl}
+# Log file: /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/xsim.log
+# Journal file: /mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/snapshot.sim/xsim_script.tcl
+# xsim {snapshot.sim} -wdb {sim.wdb} -autoloadwcfg -runall -stats
+Vivado Simulator 2017.4
+Time resolution is 1 ps
+run -all
+Simulation finished:        2022 test cases           0 errors [test_lc4_regfile.input]
+<scorePossible>       2022</scorePossible>
+<scoreActual>       2022</scoreActual>
+$finish called at time : 10217 ns : File "/mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/testbench_lc4_regfile.v" Line 126
+exit
+INFO: Simulation Memory Usage: 132872 KB (Peak: 194048 KB)
+INFO: Simulation CPU Usage: 30 ms
+INFO: [Common 17-206] Exiting xsim at Wed Feb 21 19:44:26 2018...

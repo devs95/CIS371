@@ -1,0 +1,7 @@
+0.6
+2017.4
+Dec 15 2017
+20:57:24
+/mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/lc4_regfile.v,1519260178,verilog,,/mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/register.v,,lc4_regfile,,mylib,,,,,,
+/mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/register.v,1517930586,verilog,,/mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/testbench_lc4_regfile.v,,Nbit_reg,,mylib,,,,,,
+/mnt/castor/seas_home/d/dsharm/cis371/lab3-regfile/testbench_lc4_regfile.v,1517930586,verilog,,,,test_regfile,,mylib,,,,,,

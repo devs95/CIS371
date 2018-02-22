@@ -1,0 +1,576 @@
+#-----------------------------------------------------------
+# Vivado v2017.4 (64-bit)
+# SW Build 2086221 on Fri Dec 15 20:54:30 MST 2017
+# IP Build 2085800 on Fri Dec 15 22:25:07 MST 2017
+# Start of session at: Wed Feb 21 23:32:12 2018
+# Process ID: 31899
+# Current directory: /mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle
+# Command line: vivado -mode batch -source ../common/tcl/build.tcl
+# Log file: /mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/vivado.log
+# Journal file: /mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/vivado.jou
+#-----------------------------------------------------------
+source ../common/tcl/build.tcl
+# set outputDir ./output
+# file mkdir $outputDir
+# proc get_file_contents { filename } {
+#     if {[catch {
+#         set FH [open $filename r]
+#         set content [read $FH]
+#         close $FH
+#     } errorstring]} {
+#         error " File $filename could not be opened : $errorstring "
+#     }
+#     return $content
+# }
+# if {[get_file_contents .step] == "synthesis"} { # just doing synthesis
+#     read_verilog [get_file_contents .synthesis-source-files]
+# } else { # going all the way to implementation
+#     read_verilog [get_file_contents .implementation-source-files]
+# }
+# set_part xc7z020clg484-1
+INFO: [Coretcl 2-1500] The part has been set to 'xc7z020clg484-1' for the current project only. Run set_part -help for more details. To evaluate different speed grades in the current design, use the set_speed_grade command, or use the open_checkpoint -part command to change the part used by an existing checkpoint design.
+# if { [string length [get_file_contents .ip-blocks]] > 0 } {
+#     read_ip [get_file_contents .ip-blocks]
+# 
+#     # generate synthesis targets for IP blocks, so they will get synthesized by synth_design below
+#     if { [llength [get_ips]] > 0 } {
+#         generate_target all [get_ips]
+#         #synth_ip [get_ips charLib init_sequence_rom pixel_buffer] # <- doesn't work for some reason
+#     }
+# }
+# if {[get_file_contents .step] == "synthesis"} { # just doing synthesis
+#     synth_design -top [get_file_contents .top-synth-module] -part xc7z020clg484-1
+# 
+# } else { # going all the way to implementation instead
+#     if {[get_file_contents .top-impl-module] == ""} {
+#         error "This design has no top-level module defined for implementation. It can only be run through synthesis."
+#     }
+# 
+#     # only add constraint files if there are any
+#     if { [string length [get_file_contents .constraint-files]] > 0 } {
+#         read_xdc [get_file_contents .constraint-files]
+#     }
+# 
+#     synth_design -top [get_file_contents .top-impl-module] -part xc7z020clg484-1
+# }
+Command: synth_design -top lc4_processor -part xc7z020clg484-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 31905 
+---------------------------------------------------------------------------------
+Starting Synthesize : Time (s): cpu = 00:00:06 ; elapsed = 00:00:08 . Memory (MB): peak = 1225.816 ; gain = 63.000 ; free physical = 8983 ; free virtual = 15967
+---------------------------------------------------------------------------------
+INFO: [Synth 8-638] synthesizing module 'lc4_processor' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v:13]
+INFO: [Synth 8-638] synthesizing module 'Nbit_reg' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:14]
+	Parameter n bound to: 16 - type: integer 
+	Parameter r bound to: 16'b1000001000000000 
+INFO: [Synth 8-256] done synthesizing module 'Nbit_reg' (1#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:14]
+INFO: [Synth 8-638] synthesizing module 'Nbit_reg__parameterized0' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:14]
+	Parameter n bound to: 3 - type: integer 
+	Parameter r bound to: 3'b000 
+INFO: [Synth 8-256] done synthesizing module 'Nbit_reg__parameterized0' (1#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:14]
+INFO: [Synth 8-638] synthesizing module 'lc4_nzp_branch_logic' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v:200]
+INFO: [Synth 8-256] done synthesizing module 'lc4_nzp_branch_logic' (2#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v:200]
+INFO: [Synth 8-638] synthesizing module 'lc4_decoder' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_decoder.v:4]
+INFO: [Synth 8-256] done synthesizing module 'lc4_decoder' (3#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_decoder.v:4]
+INFO: [Synth 8-638] synthesizing module 'lc4_regfile' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_regfile.v:13]
+	Parameter n bound to: 16 - type: integer 
+INFO: [Synth 8-638] synthesizing module 'Nbit_reg__parameterized1' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:14]
+	Parameter n bound to: 16 - type: integer 
+	Parameter r bound to: 16'b0000000000000000 
+INFO: [Synth 8-256] done synthesizing module 'Nbit_reg__parameterized1' (3#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:14]
+INFO: [Synth 8-256] done synthesizing module 'lc4_regfile' (4#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_regfile.v:13]
+WARNING: [Synth 8-350] instance 'regfile' of module 'lc4_regfile' requires 10 connections, but only 7 given [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v:103]
+INFO: [Synth 8-638] synthesizing module 'lc4_alu' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v:7]
+INFO: [Synth 8-638] synthesizing module 'lc4_divider' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_divider.v:6]
+INFO: [Synth 8-638] synthesizing module 'lc4_divider_one_iter' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_divider.v:37]
+INFO: [Synth 8-256] done synthesizing module 'lc4_divider_one_iter' (5#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_divider.v:37]
+INFO: [Synth 8-256] done synthesizing module 'lc4_divider' (6#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_divider.v:6]
+INFO: [Synth 8-638] synthesizing module 'barrel_shift' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v:179]
+INFO: [Synth 8-256] done synthesizing module 'barrel_shift' (7#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v:179]
+INFO: [Synth 8-638] synthesizing module 'lc4_comparator' [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v:190]
+INFO: [Synth 8-256] done synthesizing module 'lc4_comparator' (8#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v:190]
+INFO: [Synth 8-256] done synthesizing module 'lc4_alu' (9#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v:7]
+INFO: [Synth 8-256] done synthesizing module 'lc4_processor' (10#1) [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v:13]
+WARNING: [Synth 8-3917] design lc4_processor has port test_stall[1] driven by constant 0
+WARNING: [Synth 8-3917] design lc4_processor has port test_stall[0] driven by constant 0
+---------------------------------------------------------------------------------
+Finished Synthesize : Time (s): cpu = 00:00:07 ; elapsed = 00:00:10 . Memory (MB): peak = 1268.410 ; gain = 105.594 ; free physical = 8992 ; free virtual = 15977
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:07 ; elapsed = 00:00:10 . Memory (MB): peak = 1268.410 ; gain = 105.594 ; free physical = 8992 ; free virtual = 15977
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7z020clg484-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:07 ; elapsed = 00:00:10 . Memory (MB): peak = 1276.383 ; gain = 113.566 ; free physical = 8992 ; free virtual = 15977
+---------------------------------------------------------------------------------
+INFO: [Device 21-403] Loading part xc7z020clg484-1
+INFO: [Synth 8-5544] ROM "we_00" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_10" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_20" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_30" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_40" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_50" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_60" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_70" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5546] ROM "nzp_in0" won't be mapped to RAM because it is too sparse
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:07 ; elapsed = 00:00:11 . Memory (MB): peak = 1292.371 ; gain = 129.555 ; free physical = 8982 ; free virtual = 15967
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+No constraint files found.
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input     17 Bit       Adders := 4     
+	   3 Input     16 Bit       Adders := 17    
+	   2 Input     16 Bit       Adders := 7     
++---XORs : 
+	   2 Input     16 Bit         XORs := 1     
++---Registers : 
+	               16 Bit    Registers := 9     
+	                3 Bit    Registers := 1     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 81    
+	   5 Input     16 Bit        Muxes := 2     
+	   4 Input     16 Bit        Muxes := 2     
+	   2 Input      3 Bit        Muxes := 5     
+	   2 Input      2 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 25    
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Hierarchical Component Statistics 
+---------------------------------------------------------------------------------
+Hierarchical RTL Component report 
+Module lc4_processor 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     16 Bit       Adders := 1     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 3     
+	   2 Input      3 Bit        Muxes := 1     
+	   2 Input      2 Bit        Muxes := 1     
+Module Nbit_reg 
+Detailed RTL Component Info : 
++---Registers : 
+	               16 Bit    Registers := 1     
+Module Nbit_reg__parameterized0 
+Detailed RTL Component Info : 
++---Registers : 
+	                3 Bit    Registers := 1     
+Module lc4_nzp_branch_logic 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input      1 Bit        Muxes := 1     
+Module lc4_decoder 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input      3 Bit        Muxes := 4     
+Module Nbit_reg__parameterized1 
+Detailed RTL Component Info : 
++---Registers : 
+	               16 Bit    Registers := 1     
+Module lc4_regfile 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input      1 Bit        Muxes := 8     
+Module lc4_divider_one_iter 
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input     16 Bit       Adders := 1     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 3     
+	   2 Input      1 Bit        Muxes := 1     
+Module lc4_divider 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 2     
+Module barrel_shift 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 5     
+Module lc4_comparator 
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input     17 Bit       Adders := 1     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 1     
+Module lc4_alu 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     16 Bit       Adders := 6     
+	   3 Input     16 Bit       Adders := 1     
++---XORs : 
+	   2 Input     16 Bit         XORs := 1     
++---Muxes : 
+	   5 Input     16 Bit        Muxes := 2     
+	   4 Input     16 Bit        Muxes := 2     
+	   2 Input     16 Bit        Muxes := 19    
+---------------------------------------------------------------------------------
+Finished RTL Hierarchical Component Statistics
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 220 (col length:60)
+BRAMs: 280 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+INFO: [Synth 8-5544] ROM "we_00" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_10" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_20" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_30" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_40" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_50" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_60" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-5544] ROM "we_70" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+DSP Report: Generating DSP o_mul, operation Mode is: A*B.
+DSP Report: operator o_mul is absorbed into DSP o_mul.
+INFO: [Synth 8-5546] ROM "nzp_in0" won't be mapped to RAM because it is too sparse
+WARNING: [Synth 8-6014] Unused sequential element pc_reg/state_reg was removed.  [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v:25]
+WARNING: [Synth 8-3917] design lc4_processor has port test_stall[1] driven by constant 0
+WARNING: [Synth 8-3917] design lc4_processor has port test_stall[0] driven by constant 0
+WARNING: [Synth 8-3331] design lc4_divider_one_iter has unconnected port i_remainder[15]
+WARNING: [Synth 8-3331] design lc4_divider_one_iter has unconnected port i_quotient[15]
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[0]' (FDRE) to 'regfile/r6/state_reg[0]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[0]' (FDRE) to 'regfile/r4/state_reg[0]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[0]' (FDRE) to 'regfile/r4/state_reg[0]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[0]' (FDRE) to 'regfile/r2/state_reg[0]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[0]' (FDRE) to 'regfile/r2/state_reg[0]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[0]' (FDRE) to 'regfile/r0/state_reg[0]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[0]' (FDRE) to 'regfile/r0/state_reg[0]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[0] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[1]' (FDRE) to 'regfile/r6/state_reg[1]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[1]' (FDRE) to 'regfile/r4/state_reg[1]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[1]' (FDRE) to 'regfile/r4/state_reg[1]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[1]' (FDRE) to 'regfile/r2/state_reg[1]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[1]' (FDRE) to 'regfile/r2/state_reg[1]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[1]' (FDRE) to 'regfile/r0/state_reg[1]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[1]' (FDRE) to 'regfile/r0/state_reg[1]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[1] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[2]' (FDRE) to 'regfile/r6/state_reg[2]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[2]' (FDRE) to 'regfile/r4/state_reg[2]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[2]' (FDRE) to 'regfile/r4/state_reg[2]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[2]' (FDRE) to 'regfile/r2/state_reg[2]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[2]' (FDRE) to 'regfile/r2/state_reg[2]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[2]' (FDRE) to 'regfile/r0/state_reg[2]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[2]' (FDRE) to 'regfile/r0/state_reg[2]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[2] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[3]' (FDRE) to 'regfile/r6/state_reg[3]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[3]' (FDRE) to 'regfile/r4/state_reg[3]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[3]' (FDRE) to 'regfile/r4/state_reg[3]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[3]' (FDRE) to 'regfile/r2/state_reg[3]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[3]' (FDRE) to 'regfile/r2/state_reg[3]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[3]' (FDRE) to 'regfile/r0/state_reg[3]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[3]' (FDRE) to 'regfile/r0/state_reg[3]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[3] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[4]' (FDRE) to 'regfile/r6/state_reg[4]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[4]' (FDRE) to 'regfile/r4/state_reg[4]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[4]' (FDRE) to 'regfile/r4/state_reg[4]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[4]' (FDRE) to 'regfile/r2/state_reg[4]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[4]' (FDRE) to 'regfile/r2/state_reg[4]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[4]' (FDRE) to 'regfile/r0/state_reg[4]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[4]' (FDRE) to 'regfile/r0/state_reg[4]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[4] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[5]' (FDRE) to 'regfile/r6/state_reg[5]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[5]' (FDRE) to 'regfile/r4/state_reg[5]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[5]' (FDRE) to 'regfile/r4/state_reg[5]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[5]' (FDRE) to 'regfile/r2/state_reg[5]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[5]' (FDRE) to 'regfile/r2/state_reg[5]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[5]' (FDRE) to 'regfile/r0/state_reg[5]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[5]' (FDRE) to 'regfile/r0/state_reg[5]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[5] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[6]' (FDRE) to 'regfile/r6/state_reg[6]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[6]' (FDRE) to 'regfile/r4/state_reg[6]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[6]' (FDRE) to 'regfile/r4/state_reg[6]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[6]' (FDRE) to 'regfile/r2/state_reg[6]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[6]' (FDRE) to 'regfile/r2/state_reg[6]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[6]' (FDRE) to 'regfile/r0/state_reg[6]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[6]' (FDRE) to 'regfile/r0/state_reg[6]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[6] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[7]' (FDRE) to 'regfile/r6/state_reg[7]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[7]' (FDRE) to 'regfile/r4/state_reg[7]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[7]' (FDRE) to 'regfile/r4/state_reg[7]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[7]' (FDRE) to 'regfile/r2/state_reg[7]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[7]' (FDRE) to 'regfile/r2/state_reg[7]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[7]' (FDRE) to 'regfile/r0/state_reg[7]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[7]' (FDRE) to 'regfile/r0/state_reg[7]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[7] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[8]' (FDRE) to 'regfile/r6/state_reg[8]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[8]' (FDRE) to 'regfile/r4/state_reg[8]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[8]' (FDRE) to 'regfile/r4/state_reg[8]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[8]' (FDRE) to 'regfile/r2/state_reg[8]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[8]' (FDRE) to 'regfile/r2/state_reg[8]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[8]' (FDRE) to 'regfile/r0/state_reg[8]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[8]' (FDRE) to 'regfile/r0/state_reg[8]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[8] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[9]' (FDRE) to 'regfile/r6/state_reg[9]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[9]' (FDRE) to 'regfile/r4/state_reg[9]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[9]' (FDRE) to 'regfile/r4/state_reg[9]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[9]' (FDRE) to 'regfile/r2/state_reg[9]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[9]' (FDRE) to 'regfile/r2/state_reg[9]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[9]' (FDRE) to 'regfile/r0/state_reg[9]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[9]' (FDRE) to 'regfile/r0/state_reg[9]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[9] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[10]' (FDRE) to 'regfile/r6/state_reg[10]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[10]' (FDRE) to 'regfile/r4/state_reg[10]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[10]' (FDRE) to 'regfile/r4/state_reg[10]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[10]' (FDRE) to 'regfile/r2/state_reg[10]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[10]' (FDRE) to 'regfile/r2/state_reg[10]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[10]' (FDRE) to 'regfile/r0/state_reg[10]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[10]' (FDRE) to 'regfile/r0/state_reg[10]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[10] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[11]' (FDRE) to 'regfile/r6/state_reg[11]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[11]' (FDRE) to 'regfile/r4/state_reg[11]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[11]' (FDRE) to 'regfile/r4/state_reg[11]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[11]' (FDRE) to 'regfile/r2/state_reg[11]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[11]' (FDRE) to 'regfile/r2/state_reg[11]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[11]' (FDRE) to 'regfile/r0/state_reg[11]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[11]' (FDRE) to 'regfile/r0/state_reg[11]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[11] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[12]' (FDRE) to 'regfile/r6/state_reg[12]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[12]' (FDRE) to 'regfile/r4/state_reg[12]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[12]' (FDRE) to 'regfile/r4/state_reg[12]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[12]' (FDRE) to 'regfile/r2/state_reg[12]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[12]' (FDRE) to 'regfile/r2/state_reg[12]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[12]' (FDRE) to 'regfile/r0/state_reg[12]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[12]' (FDRE) to 'regfile/r0/state_reg[12]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[12] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[13]' (FDRE) to 'regfile/r6/state_reg[13]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[13]' (FDRE) to 'regfile/r4/state_reg[13]'
+INFO: [Synth 8-3886] merging instance 'regfile/r5/state_reg[13]' (FDRE) to 'regfile/r4/state_reg[13]'
+INFO: [Synth 8-3886] merging instance 'regfile/r4/state_reg[13]' (FDRE) to 'regfile/r2/state_reg[13]'
+INFO: [Synth 8-3886] merging instance 'regfile/r3/state_reg[13]' (FDRE) to 'regfile/r2/state_reg[13]'
+INFO: [Synth 8-3886] merging instance 'regfile/r2/state_reg[13]' (FDRE) to 'regfile/r0/state_reg[13]'
+INFO: [Synth 8-3886] merging instance 'regfile/r1/state_reg[13]' (FDRE) to 'regfile/r0/state_reg[13]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[13] )
+INFO: [Synth 8-3886] merging instance 'regfile/r7/state_reg[14]' (FDRE) to 'regfile/r6/state_reg[14]'
+INFO: [Synth 8-3886] merging instance 'regfile/r6/state_reg[14]' (FDRE) to 'regfile/r4/state_reg[14]'
+INFO: [Common 17-14] Message 'Synth 8-3886' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[14] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\regfile/r0/state_reg[15] )
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[0]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[1]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[2]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[3]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[4]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[5]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[6]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[7]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[8]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[9]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[10]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[11]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[12]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[13]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[14]) is unused and will be removed from module lc4_processor.
+WARNING: [Synth 8-3332] Sequential element (regfile/r0/state_reg[15]) is unused and will be removed from module lc4_processor.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:17 ; elapsed = 00:00:48 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8823 ; free virtual = 15809
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+
+DSP: Preliminary Mapping  Report (see note below)
++------------+-------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name | DSP Mapping | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++------------+-------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|lc4_alu     | A*B         | 16     | 16     | -      | -      | 32     | 0    | 0    | -    | -    | -     | 0    | 0    | 
++------------+-------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:17 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15810
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:17 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+-------+------+
+|      |Cell   |Count |
++------+-------+------+
+|1     |BUFG   |     1|
+|2     |CARRY4 |    23|
+|3     |LUT1   |    25|
+|4     |LUT2   |    48|
+|5     |LUT3   |     7|
+|6     |LUT4   |    53|
+|7     |LUT5   |    35|
+|8     |LUT6   |    94|
+|9     |FDRE   |    17|
+|10    |FDSE   |     2|
+|11    |IBUF   |    43|
+|12    |OBUF   |   148|
++------+-------+------+
+
+Report Instance Areas: 
++------+------------------+-------------------------+------+
+|      |Instance          |Module                   |Cells |
++------+------------------+-------------------------+------+
+|1     |top               |                         |   496|
+|2     |  NZP_reg         |Nbit_reg__parameterized0 |   112|
+|3     |  alu             |lc4_alu                  |   119|
+|4     |    lc4_cmp_cmpi  |lc4_comparator           |    17|
+|5     |    lc4_cmp_cmpiu |lc4_comparator_0         |    29|
+|6     |  pc_reg          |Nbit_reg                 |    49|
++------+------------------+-------------------------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8824 ; free virtual = 15809
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 24 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8825 ; free virtual = 15810
+Synthesis Optimization Complete : Time (s): cpu = 00:00:18 ; elapsed = 00:00:49 . Memory (MB): peak = 1440.062 ; gain = 277.246 ; free physical = 8832 ; free virtual = 15818
+INFO: [Project 1-571] Translating synthesized netlist
+INFO: [Netlist 29-17] Analyzing 66 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Common 17-83] Releasing license: Synthesis
+168 Infos, 24 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:20 ; elapsed = 00:00:52 . Memory (MB): peak = 1565.031 ; gain = 415.555 ; free physical = 8786 ; free virtual = 15772
+# report_timing_summary -file $outputDir/post_synth_timing_summary_report.txt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 8 CPUs
+report_timing_summary: Time (s): cpu = 00:00:10 ; elapsed = 00:00:31 . Memory (MB): peak = 2044.578 ; gain = 479.547 ; free physical = 8332 ; free virtual = 15318
+# report_utilization -file $outputDir/post_synth_utilization.txt
+report_utilization: Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.08 . Memory (MB): peak = 2044.578 ; gain = 0.000 ; free physical = 8328 ; free virtual = 15313
+# report_drc -file $outputDir/post_synth_drc_report.txt
+Command: report_drc -file ./output/post_synth_drc_report.txt
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home1/c/cis371/software/Vivado/2017.4/data/ip'.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Coretcl 2-168] The results of DRC are in file /mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/output/post_synth_drc_report.txt.
+report_drc completed successfully
+report_drc: Time (s): cpu = 00:00:04 ; elapsed = 00:00:10 . Memory (MB): peak = 2145.141 ; gain = 100.562 ; free physical = 8323 ; free virtual = 15309
+# puts "Synthesis complete!"
+Synthesis complete!
+# if {[get_file_contents .step] == "synthesis"} {
+#     exit
+# }
+INFO: [Common 17-206] Exiting Vivado at Wed Feb 21 23:34:00 2018...

@@ -1,0 +1,60 @@
+Vivado Simulator 2017.4
+Copyright 1986-1999, 2001-2016 Xilinx, Inc. All Rights Reserved.
+Running: /home1/c/cis371/software/Vivado/2017.4/bin/unwrapped/lnx64.o/xelab -cc gcc --debug typical --prj .prj --snapshot snapshot.sim --lib mylib mylib.test_processor 
+Multi-threading is on. Using 6 slave threads.
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/.set_testcase.v" into library mylib
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_alu.v" into library mylib
+INFO: [VRFC 10-311] analyzing module lc4_alu
+INFO: [VRFC 10-311] analyzing module barrel_shift
+INFO: [VRFC 10-311] analyzing module lc4_comparator
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_decoder.v" into library mylib
+INFO: [VRFC 10-311] analyzing module lc4_decoder
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_divider.v" into library mylib
+INFO: [VRFC 10-311] analyzing module lc4_divider
+INFO: [VRFC 10-311] analyzing module lc4_divider_one_iter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_regfile.v" into library mylib
+INFO: [VRFC 10-311] analyzing module lc4_regfile
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v" into library mylib
+INFO: [VRFC 10-311] analyzing module lc4_processor
+INFO: [VRFC 10-311] analyzing module lc4_nzp_branch_logic
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/register.v" into library mylib
+INFO: [VRFC 10-311] analyzing module Nbit_reg
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/lc4_memory.v" into library mylib
+INFO: [VRFC 10-311] analyzing module lc4_memory
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/clock_util.v" into library mylib
+INFO: [VRFC 10-311] analyzing module count
+INFO: [VRFC 10-311] analyzing module lc4_we_gen
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/delay_eight_cycles.v" into library mylib
+INFO: [VRFC 10-311] analyzing module delay_eight_cycles
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/include/bram.v" into library mylib
+INFO: [VRFC 10-311] analyzing module bram
+INFO: [VRFC 10-2263] Analyzing Verilog file "/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/testbench_lc4_processor.v" into library mylib
+INFO: [VRFC 10-311] analyzing module test_processor
+Starting static elaboration
+WARNING: [VRFC 10-1770] port i2out remains unconnected for this instance [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/testbench_lc4_processor.v:74]
+WARNING: [VRFC 10-1770] port led_data remains unconnected for this instance [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/testbench_lc4_processor.v:93]
+WARNING: [VRFC 10-1770] port clk remains unconnected for this instance [/mnt/castor/seas_home/d/dsharm/cis371/lab3-singlecycle/lc4_single.v:103]
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module mylib.count
+Compiling module mylib.lc4_we_gen
+Compiling module mylib.Nbit_reg(n=16,r=16'b0)
+Compiling module mylib.bram
+Compiling module mylib.Nbit_reg(n=16)
+Compiling module mylib.delay_eight_cycles(n=16)
+Compiling module mylib.lc4_memory
+Compiling module mylib.Nbit_reg(n=16,r=16'b100000100000...
+Compiling module mylib.Nbit_reg(n=3,r=3'b0)
+Compiling module mylib.lc4_nzp_branch_logic
+Compiling module mylib.lc4_decoder
+Compiling module mylib.lc4_regfile
+Compiling module mylib.lc4_divider_one_iter
+Compiling module mylib.lc4_divider
+Compiling module mylib.barrel_shift
+Compiling module mylib.lc4_comparator
+Compiling module mylib.lc4_alu
+Compiling module mylib.lc4_processor
+Compiling module mylib.test_processor
+Built simulation snapshot snapshot.sim

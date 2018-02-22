@@ -1,0 +1,1 @@
+-cc "gcc" --debug "typical" --prj ".prj" --snapshot "snapshot.sim" --lib "mylib" "mylib.test_regfile" 
