@@ -50,14 +50,16 @@ module lc4_processor(input wire         clk,             // main clock
    
    wire [1:0] stall_A;
    wire [1:0] stall_B;
+   wire swap;
+   wire flush;
 /**********************************************FETCH STAGE**********************************************/   
 
    wire [15:0] F_pc_reg_out;
-   wire [15:0] F_pc_A = (stall_B == 2'h1) ? D_IR_pc_B : F_pc_reg_out;
+   wire [15:0] F_pc_A = swap ? D_IR_pc_B : F_pc_reg_out;
    wire [15:0] F_pc_B = F_pc_A + 16'h1; //PC of B will always be PC of A+1
    wire [15:0] F_next_pc = F_pc_A + 16'h2; //increment pc by 1 if only B stalls, else increment by 2
    
-   wire F_we = 1'b1;
+   wire F_we = ~load_use_A; //disable writing for load-to-use stall in pipe A
    
    Nbit_reg #(16, 16'h8200) pc_reg (.in(F_next_pc), .out(F_pc_reg_out), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst)); //pc register
    
@@ -96,6 +98,7 @@ module lc4_processor(input wire         clk,             // main clock
     wire [2:0] D_stall_rd_A;
     wire D_stall_r1re_A;
     wire D_stall_r2re_A;
+    wire D_stall_is_load_A;
     wire D_stall_is_store_A;
     wire D_stall_is_branch_A;
     wire D_stall_regfile_we_A;
@@ -106,25 +109,69 @@ module lc4_processor(input wire         clk,             // main clock
     wire [2:0] D_stall_rd_B;
     wire D_stall_r1re_B;
     wire D_stall_r2re_B;
+    wire D_stall_is_load_B;
     wire D_stall_is_store_B;
     wire D_stall_is_branch_B;
     wire D_stall_regfile_we_B;
     
     //Use parallel decoder to detect stalls because other decoder will be flushed with NOP when a stall is needed. Can't decode stall logic and flush the same decoder in 1 cycle
     lc4_decoder stall_decoder_A(.insn(D_IR_insn_A), .r1sel(D_stall_r1_A), .r1re(D_stall_r1re_A), .r2sel(D_stall_r2_A), .r2re(D_stall_r2re_A), .wsel(D_stall_rd_A), 
-    .regfile_we(D_stall_regfile_we_A), .nzp_we(), .select_pc_plus_one(), .is_load(), .is_store(D_stall_is_store_A), .is_branch(D_stall_is_branch_A), .is_control_insn());
+    .regfile_we(D_stall_regfile_we_A), .nzp_we(), .select_pc_plus_one(), .is_load(D_stall_is_load_A), .is_store(D_stall_is_store_A), .is_branch(D_stall_is_branch_A), .is_control_insn());
                             
     lc4_decoder stall_decoder_B(.insn(D_IR_insn_B), .r1sel(D_stall_r1_B), .r1re(D_stall_r1re_B), .r2sel(D_stall_r2_B), .r2re(D_stall_r2re_B), .wsel(D_stall_rd_B),
-    .regfile_we(D_stall_regfile_we_B), .nzp_we(), .select_pc_plus_one(), .is_load(), .is_store(D_stall_is_store_B), .is_branch(D_stall_is_branch_B), .is_control_insn());
+    .regfile_we(D_stall_regfile_we_B), .nzp_we(), .select_pc_plus_one(), .is_load(D_stall_is_load_B), .is_store(D_stall_is_store_B), .is_branch(D_stall_is_branch_B), .is_control_insn());
     
-    //ONLY SUPPORTS SUPERSCALAR STALL (EXCLUDING MEMORY)
-    assign stall_A = 2'h0;
-    assign stall_B =    (   ((D_stall_rd_A == D_stall_r1_B) & D_stall_r1re_B)       | 
-                            ((D_stall_rd_A == D_stall_r2_B) & D_stall_r2re_B)   )   &
-                            D_stall_regfile_we_A ? 2'h1 : 2'h0;
+    wire load_use_A =   (   //Insn A uses load from older Pipe A insn
+                            X_IR_is_load_A & //X insn A must be a load
+                            (
+                                ((D_stall_r1_A == X_IR_rd_A) & D_stall_r1re_A) | //D_rs_A == X_rd_A
+                                ((D_stall_r2_A == X_IR_rd_A) & D_stall_r2re_A & ~D_stall_is_store_A) | //D_rt_A == X_rd_A
+                                D_stall_is_branch_A //load-to-branch
+                            ) 
+                        ) |
+                        (   // Insn A uses load from older Pipe B insn
+                            X_IR_is_load_B & //X insn B must be a load
+                            (
+                                ((D_stall_r1_A == X_IR_rd_B) & D_stall_r1re_A) | //D_rs_A == X_rd_B
+                                ((D_stall_r2_A == X_IR_rd_B) & D_stall_r2re_A & ~D_stall_is_store_A) | //D_rt_A == X_rd_B
+                                D_stall_is_branch_A //load-to-branch
+                            )
+                        );
     
-    wire [1:0] D_stall_A = D_IR_stall_A;
-    wire [1:0] D_stall_B = (stall_B != 3'h0) ? stall_B : D_IR_stall_B;
+    wire load_use_B =   (   //Insn B uses load from older Pipe A insn
+                            X_IR_is_load_A & //X insn A must be a load
+                            (
+                                ((D_stall_r1_B == X_IR_rd_A) & D_stall_r1re_B) | //D_rs_B == X_rd_A
+                                ((D_stall_r2_B == X_IR_rd_A) & D_stall_r2re_B & ~D_stall_is_store_B) | //D_rt_B == X_rd_A
+                                D_stall_is_branch_A //load-to-branch
+                            ) 
+                        ) |
+                        (   // Insn B uses load from older Pipe B insn
+                            X_IR_is_load_B & //X insn B must be a load
+                            (
+                                ((D_stall_r1_B == X_IR_rd_B) & D_stall_r1re_B) | //D_rs_B == X_rd_B
+                                ((D_stall_r2_B == X_IR_rd_B) & D_stall_r2re_B & ~D_stall_is_store_B) | //D_rt_B == X_rd_B
+                                D_stall_is_branch_B //load-to-branch
+                            )
+                        );
+    
+    wire ss_stall = (   //Insn B needs result of Insn A
+                        D_stall_regfile_we_A &
+                        (
+                            ((D_stall_rd_A == D_stall_r1_B) & D_stall_r1re_B) |
+                            ((D_stall_rd_A == D_stall_r2_B) & D_stall_r2re_B & ~D_stall_is_store_B)
+                        )
+                    ) |
+                    //Both A and B access memory at same time
+                    (D_stall_is_load_A & D_stall_is_load_B) |
+                    (D_stall_is_load_A & D_stall_is_store_B) |
+                    (D_stall_is_store_A & D_stall_is_load_B) |
+                    (D_stall_is_store_A & D_stall_is_store_B);
+                    
+    assign swap = ss_stall | load_use_B;
+                    
+    wire [1:0] D_stall_A = load_use_A ? 2'h3 : D_IR_stall_A;
+    wire [1:0] D_stall_B = (ss_stall | load_use_A) ? 2'h1 : load_use_B ? 2'h3 : D_IR_stall_B;
     
     //decoder A outputs
     wire [2:0] D_r1_A;
@@ -154,8 +201,8 @@ module lc4_processor(input wire         clk,             // main clock
     wire D_regfile_we_B;
     wire D_nzp_we_B;
     
-    wire [15:0] D_insn_A = D_IR_insn_A; //change to support load-to-use stall and flush on branch
-    wire [15:0] D_insn_B = (stall_B == 2'h1) ? 16'h0 : D_IR_insn_B; //change to support load-to-use stall and flush on branch
+    wire [15:0] D_insn_A = load_use_A ? 16'h0 : D_IR_insn_A;
+    wire [15:0] D_insn_B = (load_use_A | swap) ? 16'h0 : D_IR_insn_B; 
 
     //decoder A
     lc4_decoder decoder_A (.insn(D_insn_A), .r1sel(D_r1_A), .r1re(D_r1re_A), .r2sel(D_r2_A), .r2re(D_r2re_A), .wsel(D_rd_A), .regfile_we(D_regfile_we_A), .nzp_we(D_nzp_we_A), .select_pc_plus_one(D_select_pc_plus_one_A),
@@ -364,8 +411,8 @@ module lc4_processor(input wire         clk,             // main clock
     Nbit_reg #(16, 16'h0) XM_alu_result_B (.in(X_alu_result_B), .out(M_IR_alu_result_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) XM_rd_data_B (.in(X_rd_data_B), .out(M_IR_rd_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     //End new registers
-    Nbit_reg #(16, 16'h0) XM_r1_data_B (.in(X_IR_r1_data_B), .out(M_IR_r1_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) XM_r2_data_B (.in(X_IR_r2_data_B), .out(M_IR_r2_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_r1_data_B (.in(X_r1_data_B), .out(M_IR_r1_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_r2_data_B (.in(X_r2_data_B), .out(M_IR_r2_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(3, 3'h0) XM_r1_B (.in(X_IR_r1_B), .out(M_IR_r1_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(3, 3'h0) XM_r2_B (.in(X_IR_r2_B), .out(M_IR_r2_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(3, 3'h0) XM_rd_B (.in(X_IR_rd_B), .out(M_IR_rd_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
@@ -385,24 +432,37 @@ module lc4_processor(input wire         clk,             // main clock
     
 /**********************************************MEMORY STAGE**********************************************/
 
-    wire [15:0] M_dmem_addr = 16'h0; //memory address
-    wire [15:0] M_dmem_wdata = 16'h0; //WM Bypass - assign memory write data
-    
-    wire [15:0] M_dmem_rdata = i_cur_dmem_data; //read current output of memory
+    wire [15:0] M_dmem_addr_A = (M_IR_is_load_A | M_IR_is_store_A) ? M_IR_alu_result_A : 16'h0; 
+    wire [15:0] M_dmem_addr_B = (M_IR_is_load_B | M_IR_is_store_B) ? M_IR_alu_result_B : 16'h0; 
+                                
+    wire [15:0] M_dmem_wdata_A =    ~M_IR_is_store_A ? 16'h0 :
+                                    ((M_IR_r2_A == W_IR_rd_B) & W_IR_regfile_we_B) ? W_rd_data_B : //WM Bypass into Pipe A
+                                    ((M_IR_r2_A == W_IR_rd_A) & W_IR_regfile_we_A) ? W_rd_data_A : 
+                                    M_IR_r2_data_A;
+
+    wire [15:0] M_dmem_wdata_B =    ~M_IR_is_store_B ? 16'h0 :
+                                    ((M_IR_r2_B == M_IR_rd_A) & M_IR_regfile_we_A) ? M_IR_rd_data_A :
+                                    ((M_IR_r2_B == W_IR_rd_B) & W_IR_regfile_we_B) ? W_rd_data_B: //WM Bypass into Pipe B
+                                    ((M_IR_r2_B == W_IR_rd_A) & W_IR_regfile_we_A) ? W_rd_data_A: 
+                                    M_IR_r2_data_B;
+                                    
+    wire [15:0] M_dmem_rdata_A = M_IR_is_load_A ? i_cur_dmem_data : 16'h0; //read current output of memory
+    wire [15:0] M_dmem_rdata_B = M_IR_is_load_B ? i_cur_dmem_data : 16'h0;
     
     //assign inputs to memory 
-    assign o_dmem_towrite = M_dmem_wdata;
-    assign o_dmem_we = 1'b0;
-    assign o_dmem_addr = M_dmem_addr;
+    assign o_dmem_towrite = M_IR_is_store_A ? M_dmem_wdata_A : M_dmem_wdata_B;
+    assign o_dmem_we = M_IR_is_store_A | M_IR_is_store_B;
+    assign o_dmem_addr =    (M_IR_is_load_A | M_IR_is_store_A) ? M_IR_alu_result_A : 
+                            (M_IR_is_load_B | M_IR_is_store_B) ? M_IR_alu_result_B :
+                            16'h0;
 
 /****Memory-Writeback Intermediate Register***/
     
-    //MW_reg shared outputs
-    wire [15:0] W_IR_dmem_addr;
-    wire [15:0] W_IR_dmem_wdata;
-    wire [15:0] W_IR_dmem_rdata;
-    
-    //WM_reg A outpus
+    //MW_reg A outpus
+    wire [15:0] W_IR_dmem_addr_A;
+    wire [15:0] W_IR_dmem_wdata_A;
+    wire [15:0] W_IR_dmem_rdata_A;
+    //End new outputs
     wire [15:0] W_IR_alu_result_A;
     wire [15:0] W_IR_rd_data_A;
     wire [15:0] W_IR_r1_data_A;
@@ -423,7 +483,11 @@ module lc4_processor(input wire         clk,             // main clock
     wire [15:0] W_IR_insn_A;
     wire [1:0] W_IR_stall_A;
     
-    //WM_reg B outputs
+    //MW_reg B outputs
+    wire [15:0] W_IR_dmem_addr_B;
+    wire [15:0] W_IR_dmem_wdata_B;
+    wire [15:0] W_IR_dmem_rdata_B;
+    //End new outputs
     wire [15:0] W_IR_alu_result_B;
     wire [15:0] W_IR_rd_data_B;
     wire [15:0] W_IR_r1_data_B;
@@ -444,12 +508,11 @@ module lc4_processor(input wire         clk,             // main clock
     wire [15:0] W_IR_insn_B;
     wire [1:0] W_IR_stall_B;
     
-    //MW_reg shared registers
-    Nbit_reg #(16, 16'h0) MW_dmem_addr (.in(M_dmem_addr), .out(W_IR_dmem_addr), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) MW_dmem_wdata (.in(M_dmem_wdata), .out(W_IR_dmem_wdata), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) MW_dmem_rdata (.in(M_dmem_rdata), .out(W_IR_dmem_rdata), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    
     //MW_reg A registers
+    Nbit_reg #(16, 16'h0) MW_dmem_addr_A (.in(M_dmem_addr_A), .out(W_IR_dmem_addr_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) MW_dmem_wdata_A (.in(M_dmem_wdata_A), .out(W_IR_dmem_wdata_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) MW_dmem_rdata_A (.in(M_dmem_rdata_A), .out(W_IR_dmem_rdata_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    //End new registers
     Nbit_reg #(16, 16'h0) MW_alu_result_A (.in(M_IR_alu_result_A), .out(W_IR_alu_result_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) MW_rd_data_A (.in(M_IR_rd_data_A), .out(W_IR_rd_data_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) MW_r1_data_A (.in(M_IR_r1_data_A), .out(W_IR_r1_data_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
@@ -471,6 +534,10 @@ module lc4_processor(input wire         clk,             // main clock
     Nbit_reg #(2, 2'h2) MW_stall_A (.in(M_IR_stall_A), .out(W_IR_stall_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     
     //MW_reg B registers
+    Nbit_reg #(16, 16'h0) MW_dmem_addr_B (.in(M_dmem_addr_B), .out(W_IR_dmem_addr_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) MW_dmem_wdata_B (.in(M_dmem_wdata_B), .out(W_IR_dmem_wdata_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) MW_dmem_rdata_B (.in(M_dmem_rdata_B), .out(W_IR_dmem_rdata_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    //End new registers
     Nbit_reg #(16, 16'h0) MW_alu_result_B (.in(M_IR_alu_result_B), .out(W_IR_alu_result_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) MW_rd_data_B (.in(M_IR_rd_data_B), .out(W_IR_rd_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) MW_r1_data_B (.in(M_IR_r1_data_B), .out(W_IR_r1_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
@@ -492,8 +559,8 @@ module lc4_processor(input wire         clk,             // main clock
     Nbit_reg #(2, 2'h2) MW_stall_B (.in(M_IR_stall_B), .out(W_IR_stall_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
 /**********************************************WRITEBACK STAGE**********************************************/
 
-    wire [15:0] W_rd_data_A = W_IR_rd_data_A; //select memory data or alu result to write
-    wire [15:0] W_rd_data_B = W_IR_rd_data_B; //select memory data or alu result to write
+    wire [15:0] W_rd_data_A = W_IR_is_load_A ? W_IR_dmem_rdata_A : W_IR_rd_data_A; //select memory data or alu result to write
+    wire [15:0] W_rd_data_B = W_IR_is_load_B ? W_IR_dmem_rdata_B : W_IR_rd_data_B; //select memory data or alu result to write
     
     //set test wires
     assign test_stall_A = W_IR_stall_A;
@@ -505,8 +572,8 @@ module lc4_processor(input wire         clk,             // main clock
     assign test_nzp_we_A = W_IR_nzp_we_A;
     assign test_nzp_new_bits_A = (W_rd_data_A[15] == 1) ? 3'b100 : (W_rd_data_A == 16'b0) ? 3'b010 : 3'b001;
     assign test_dmem_we_A = W_IR_is_store_A;
-    assign test_dmem_addr_A = 16'h0;
-    assign test_dmem_data_A = 16'h0;
+    assign test_dmem_addr_A = W_IR_dmem_addr_A;
+    assign test_dmem_data_A = W_IR_is_store_A ? W_IR_dmem_wdata_A : W_IR_dmem_rdata_A;
     
     assign test_stall_B = W_IR_stall_B;
     assign test_cur_pc_B = W_IR_pc_B;
@@ -517,8 +584,8 @@ module lc4_processor(input wire         clk,             // main clock
     assign test_nzp_we_B = W_IR_nzp_we_B;
     assign test_nzp_new_bits_B = (W_rd_data_B[15] == 1) ? 3'b100 : (W_rd_data_B == 16'b0) ? 3'b010 : 3'b001;
     assign test_dmem_we_B = W_IR_is_store_B;
-    assign test_dmem_addr_B = 16'h0;
-    assign test_dmem_data_B = 16'h0;
+    assign test_dmem_addr_B = W_IR_dmem_addr_B;
+    assign test_dmem_data_B = W_IR_is_store_B ? W_IR_dmem_wdata_B : W_IR_dmem_rdata_B;
     
    /* Add $display(...) calls in the always block below to
     * print out debug information at the end of every cycle.
