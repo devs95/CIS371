@@ -1,3 +1,7 @@
+/* Dev Sharma - dsharm
+ * Jamaal Hay - jamaalh
+ */
+ 
 `timescale 1ns / 1ps
 
 // Prevent implicit wire declaration
@@ -48,25 +52,25 @@ module lc4_processor(input wire         clk,             // main clock
 
    /***  YOUR CODE HERE ***/
    
-   wire [1:0] stall_A;
-   wire [1:0] stall_B;
-   wire swap;
-   wire flush;
+   wire [1:0] stall_A, stall_B;
+   wire swap, flush, flush_A, flush_B;
 /**********************************************FETCH STAGE**********************************************/   
 
    wire [15:0] F_pc_reg_out;
    wire [15:0] F_pc_A = swap ? D_IR_pc_B : F_pc_reg_out;
    wire [15:0] F_pc_B = F_pc_A + 16'h1; //PC of B will always be PC of A+1
-   wire [15:0] F_next_pc = F_pc_A + 16'h2; //increment pc by 1 if only B stalls, else increment by 2
+   wire [15:0] F_next_pc = flush_A ? X_alu_result_A : flush_B ? X_alu_result_B : F_pc_A + 16'h2; //increment pc by 1 if only B stalls, else increment by 2
    
-   wire F_we = ~load_use_A; //disable writing for load-to-use stall in pipe A
+   wire F_we = flush | (~load_use_A); //disable writing for load-to-use stall in pipe A
    
    Nbit_reg #(16, 16'h8200) pc_reg (.in(F_next_pc), .out(F_pc_reg_out), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst)); //pc register
    
-   wire [15:0] F_insn_A =  i_cur_insn_A;
-   wire [15:0] F_insn_B =  i_cur_insn_B;
+   wire [15:0] F_insn_A =  flush ? 16'h0 : i_cur_insn_A;
+   wire [15:0] F_insn_B =  flush ? 16'h0 : i_cur_insn_B;
    
    assign o_cur_pc = F_pc_A;
+   
+   wire [1:0] F_stall = flush ? 2'h2 : 2'h0;
    
 /****Fetch-Decode Intermediate Register****/
 
@@ -77,7 +81,7 @@ module lc4_processor(input wire         clk,             // main clock
     //FD_reg A registers
     Nbit_reg #(16, 16'h0) FD_pc_A (.in(F_pc_A), .out(D_IR_pc_A), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) FD_insn_A (.in(F_insn_A), .out(D_IR_insn_A), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
-    Nbit_reg #(2, 2'h2) FD_stall_A (.in(2'h0), .out(D_IR_stall_A), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
+    Nbit_reg #(2, 2'h2) FD_stall_A (.in(F_stall), .out(D_IR_stall_A), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
     
     
     //FD_reg B output wires
@@ -87,7 +91,7 @@ module lc4_processor(input wire         clk,             // main clock
     //FD_reg B registers
     Nbit_reg #(16, 16'h0) FD_pc_B (.in(F_pc_B), .out(D_IR_pc_B), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
     Nbit_reg #(16, 16'h0) FD_insn_B (.in(F_insn_B), .out(D_IR_insn_B), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
-    Nbit_reg #(2, 2'h2) FD_stall_B (.in(2'h0), .out(D_IR_stall_B), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
+    Nbit_reg #(2, 2'h2) FD_stall_B (.in(F_stall), .out(D_IR_stall_B), .clk(clk), .we(F_we), .gwe(gwe), .rst(rst));
 
 
 /**********************************************DECODE STAGE**********************************************/
@@ -113,10 +117,11 @@ module lc4_processor(input wire         clk,             // main clock
     wire D_stall_is_store_B;
     wire D_stall_is_branch_B;
     wire D_stall_regfile_we_B;
+    wire D_stall_nzp_we_A;
     
     //Use parallel decoder to detect stalls because other decoder will be flushed with NOP when a stall is needed. Can't decode stall logic and flush the same decoder in 1 cycle
     lc4_decoder stall_decoder_A(.insn(D_IR_insn_A), .r1sel(D_stall_r1_A), .r1re(D_stall_r1re_A), .r2sel(D_stall_r2_A), .r2re(D_stall_r2re_A), .wsel(D_stall_rd_A), 
-    .regfile_we(D_stall_regfile_we_A), .nzp_we(), .select_pc_plus_one(), .is_load(D_stall_is_load_A), .is_store(D_stall_is_store_A), .is_branch(D_stall_is_branch_A), .is_control_insn());
+    .regfile_we(D_stall_regfile_we_A), .nzp_we(D_stall_nzp_we_A), .select_pc_plus_one(), .is_load(D_stall_is_load_A), .is_store(D_stall_is_store_A), .is_branch(D_stall_is_branch_A), .is_control_insn());
                             
     lc4_decoder stall_decoder_B(.insn(D_IR_insn_B), .r1sel(D_stall_r1_B), .r1re(D_stall_r1re_B), .r2sel(D_stall_r2_B), .r2re(D_stall_r2re_B), .wsel(D_stall_rd_B),
     .regfile_we(D_stall_regfile_we_B), .nzp_we(), .select_pc_plus_one(), .is_load(D_stall_is_load_B), .is_store(D_stall_is_store_B), .is_branch(D_stall_is_branch_B), .is_control_insn());
@@ -126,7 +131,7 @@ module lc4_processor(input wire         clk,             // main clock
                             (
                                 ((D_stall_r1_A == X_IR_rd_A) & D_stall_r1re_A) | //D_rs_A == X_rd_A
                                 ((D_stall_r2_A == X_IR_rd_A) & D_stall_r2re_A & ~D_stall_is_store_A) | //D_rt_A == X_rd_A
-                                D_stall_is_branch_A //load-to-branch
+                                (D_stall_is_branch_A & ~X_IR_nzp_we_B)//load-to-branch
                             ) 
                         ) |
                         (   // Insn A uses load from older Pipe B insn
@@ -143,7 +148,7 @@ module lc4_processor(input wire         clk,             // main clock
                             (
                                 ((D_stall_r1_B == X_IR_rd_A) & D_stall_r1re_B) | //D_rs_B == X_rd_A
                                 ((D_stall_r2_B == X_IR_rd_A) & D_stall_r2re_B & ~D_stall_is_store_B) | //D_rt_B == X_rd_A
-                                D_stall_is_branch_A //load-to-branch
+                                (D_stall_is_branch_B & ~X_IR_nzp_we_B) //load-to-branch
                             ) 
                         ) |
                         (   // Insn B uses load from older Pipe B insn
@@ -166,12 +171,14 @@ module lc4_processor(input wire         clk,             // main clock
                     (D_stall_is_load_A & D_stall_is_load_B) |
                     (D_stall_is_load_A & D_stall_is_store_B) |
                     (D_stall_is_store_A & D_stall_is_load_B) |
-                    (D_stall_is_store_A & D_stall_is_store_B);
+                    (D_stall_is_store_A & D_stall_is_store_B) |
+                    //Branch in B depends on result of A
+                    (D_stall_nzp_we_A & D_stall_is_branch_B);
                     
     assign swap = ss_stall | load_use_B;
                     
-    wire [1:0] D_stall_A = load_use_A ? 2'h3 : D_IR_stall_A;
-    wire [1:0] D_stall_B = (ss_stall | load_use_A) ? 2'h1 : load_use_B ? 2'h3 : D_IR_stall_B;
+    wire [1:0] D_stall_A = flush ? 2'h2 : load_use_A ? 2'h3 : D_IR_stall_A;
+    wire [1:0] D_stall_B = flush ? 2'h2 : (ss_stall | load_use_A) ? 2'h1 : load_use_B ? 2'h3 : D_IR_stall_B;
     
     //decoder A outputs
     wire [2:0] D_r1_A;
@@ -201,8 +208,8 @@ module lc4_processor(input wire         clk,             // main clock
     wire D_regfile_we_B;
     wire D_nzp_we_B;
     
-    wire [15:0] D_insn_A = load_use_A ? 16'h0 : D_IR_insn_A;
-    wire [15:0] D_insn_B = (load_use_A | swap) ? 16'h0 : D_IR_insn_B; 
+    wire [15:0] D_insn_A = (flush | load_use_A) ? 16'h0 : D_IR_insn_A;
+    wire [15:0] D_insn_B = (flush | load_use_A | swap) ? 16'h0 : D_IR_insn_B; 
 
     //decoder A
     lc4_decoder decoder_A (.insn(D_insn_A), .r1sel(D_r1_A), .r1re(D_r1re_A), .r2sel(D_r2_A), .r2re(D_r2re_A), .wsel(D_rd_A), .regfile_we(D_regfile_we_A), .nzp_we(D_nzp_we_A), .select_pc_plus_one(D_select_pc_plus_one_A),
@@ -339,6 +346,49 @@ module lc4_processor(input wire         clk,             // main clock
     lc4_alu alu_B(.i_insn(X_IR_insn_B), .i_pc(X_IR_pc_B), .i_r1data(X_r1_data_B), .i_r2data(X_r2_data_B), .o_result(X_alu_result_B));
     wire [15:0] X_rd_data_B = X_IR_select_pc_plus_one_B ? (X_IR_pc_B+16'b1) : X_alu_result_B;
     
+/****NZP/Branch Logic****/
+    //WX and MX bypass for NZP bits
+    wire [15:0] X_nzp_in =  M_IR_nzp_we_B ? M_IR_rd_data_B :
+                            M_IR_nzp_we_A ? M_IR_rd_data_A :
+                            W_IR_nzp_we_B ? W_rd_data_B :
+                            W_rd_data_A;
+    
+    wire [2:0] X_nzp_new_bits = X_nzp_in[15] ? 3'h4 : (X_nzp_in == 16'h0) ? 3'h2 : 3'h1;
+    wire [2:0] X_nzp_bits = (M_IR_nzp_we_A | W_IR_nzp_we_A | M_IR_nzp_we_B | W_IR_nzp_we_B) ? X_nzp_new_bits : X_nzp_reg_out;
+    //NZP register
+    wire [2:0] X_nzp_reg_out;
+    Nbit_reg #(3, 3'b000) NZP_reg (.in(X_nzp_new_bits), .out(X_nzp_reg_out), .clk(clk), .we(W_IR_nzp_we_A | W_IR_nzp_we_B), .gwe(gwe), .rst(rst));
+    //Branch Logic
+    wire X_p = X_nzp_bits[0];
+    wire X_z = X_nzp_bits[1];
+    wire X_n = X_nzp_bits[2];
+    
+    wire [2:0] X_nzp_se_A = X_IR_insn_A[11:9];
+    wire X_bre_A =      X_nzp_se_A == 3'h0 ? 1'b0 :
+                        X_nzp_se_A == 3'h1 ? X_p :
+                        X_nzp_se_A == 3'h2 ? X_z :
+                        X_nzp_se_A == 3'h3 ? X_z | X_p :
+                        X_nzp_se_A == 3'h4 ? X_n :
+                        X_nzp_se_A == 3'h5 ? X_n | X_p :
+                        X_nzp_se_A == 3'h6 ? X_n | X_z :
+                        X_n | X_z | X_p ;
+                        
+    wire [2:0] X_nzp_se_B = X_IR_insn_B[11:9];
+    wire X_bre_B =      X_nzp_se_B == 3'h0 ? 1'b0 :
+                        X_nzp_se_B == 3'h1 ? X_p :
+                        X_nzp_se_B == 3'h2 ? X_z :
+                        X_nzp_se_B == 3'h3 ? X_z | X_p :
+                        X_nzp_se_B == 3'h4 ? X_n :
+                        X_nzp_se_B == 3'h5 ? X_n | X_p :
+                        X_nzp_se_B == 3'h6 ? X_n | X_z :
+                        X_n | X_z | X_p ;
+    
+    assign flush_A = (X_bre_A & X_IR_is_branch_A) | X_IR_is_control_insn_A;
+    assign flush_B = ~flush_A & ((X_bre_B & X_IR_is_branch_B) | X_IR_is_control_insn_B);
+    assign flush = (flush_A | flush_B);
+    
+    wire [1:0] X_stall_B = flush_A ? 2'h2 : X_IR_stall_B;
+    
 /****Execute-Memory Intermediate Register****/
 
     //XM_reg A outputs
@@ -408,26 +458,26 @@ module lc4_processor(input wire         clk,             // main clock
     Nbit_reg #(2, 2'h2) XM_stall_A (.in(X_IR_stall_A), .out(M_IR_stall_A), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     
     //XM_reg B registers
-    Nbit_reg #(16, 16'h0) XM_alu_result_B (.in(X_alu_result_B), .out(M_IR_alu_result_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) XM_rd_data_B (.in(X_rd_data_B), .out(M_IR_rd_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_alu_result_B (.in(flush_A ? 16'h0 : X_alu_result_B), .out(M_IR_alu_result_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_rd_data_B (.in(flush_A ? 16'h0 : X_rd_data_B), .out(M_IR_rd_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
     //End new registers
-    Nbit_reg #(16, 16'h0) XM_r1_data_B (.in(X_r1_data_B), .out(M_IR_r1_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) XM_r2_data_B (.in(X_r2_data_B), .out(M_IR_r2_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(3, 3'h0) XM_r1_B (.in(X_IR_r1_B), .out(M_IR_r1_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(3, 3'h0) XM_r2_B (.in(X_IR_r2_B), .out(M_IR_r2_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(3, 3'h0) XM_rd_B (.in(X_IR_rd_B), .out(M_IR_rd_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_r1re_B (.in(X_IR_r1re_B), .out(M_IR_r1re_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_r2re_B (.in(X_IR_r2re_B), .out(M_IR_r2re_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_select_pc_plus_one_B (.in(X_IR_select_pc_plus_one_B), .out(M_IR_select_pc_plus_one_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_is_load_B (.in(X_IR_is_load_B), .out(M_IR_is_load_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_is_store_B (.in(X_IR_is_store_B), .out(M_IR_is_store_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_is_branch_B (.in(X_IR_is_branch_B), .out(M_IR_is_branch_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_is_control_insn_B (.in(X_IR_is_control_insn_B), .out(M_IR_is_control_insn_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_regfile_we_B (.in(X_IR_regfile_we_B), .out(M_IR_regfile_we_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(1, 1'h0) XM_nzp_we_B (.in(X_IR_nzp_we_B), .out(M_IR_nzp_we_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) XM_pc_B (.in(X_IR_pc_B), .out(M_IR_pc_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(16, 16'h0) XM_insn_B (.in(X_IR_insn_B), .out(M_IR_insn_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
-    Nbit_reg #(2, 2'h2) XM_stall_B (.in(X_IR_stall_B), .out(M_IR_stall_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_r1_data_B (.in(flush_A ? 16'h0 : X_r1_data_B), .out(M_IR_r1_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_r2_data_B (.in(flush_A ? 16'h0 : X_r2_data_B), .out(M_IR_r2_data_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(3, 3'h0) XM_r1_B (.in(flush_A ? 3'h0 : X_IR_r1_B), .out(M_IR_r1_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(3, 3'h0) XM_r2_B (.in(flush_A ? 3'h0 : X_IR_r2_B), .out(M_IR_r2_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(3, 3'h0) XM_rd_B (.in(flush_A ? 3'h0 : X_IR_rd_B), .out(M_IR_rd_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_r1re_B (.in(flush_A ? 1'h0 : X_IR_r1re_B), .out(M_IR_r1re_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_r2re_B (.in(flush_A ? 1'h0 : X_IR_r2re_B), .out(M_IR_r2re_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_select_pc_plus_one_B (.in(flush_A ? 1'h0 : X_IR_select_pc_plus_one_B), .out(M_IR_select_pc_plus_one_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_is_load_B (.in(flush_A ? 1'h0 : X_IR_is_load_B), .out(M_IR_is_load_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_is_store_B (.in(flush_A ? 1'h0 : X_IR_is_store_B), .out(M_IR_is_store_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_is_branch_B (.in(flush_A ? 1'h0 : X_IR_is_branch_B), .out(M_IR_is_branch_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_is_control_insn_B (.in(flush_A ? 1'h0 : X_IR_is_control_insn_B), .out(M_IR_is_control_insn_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_regfile_we_B (.in(flush_A ? 1'h0 : X_IR_regfile_we_B), .out(M_IR_regfile_we_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(1, 1'h0) XM_nzp_we_B (.in(flush_A ? 1'h0 : X_IR_nzp_we_B), .out(M_IR_nzp_we_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_pc_B (.in(flush_A ? 16'h0 : X_IR_pc_B), .out(M_IR_pc_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(16, 16'h0) XM_insn_B (.in(flush_A ? 16'h0 : X_IR_insn_B), .out(M_IR_insn_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
+    Nbit_reg #(2, 2'h2) XM_stall_B (.in(X_stall_B), .out(M_IR_stall_B), .clk(clk), .we(1'b1), .gwe(gwe), .rst(rst));
 
     
 /**********************************************MEMORY STAGE**********************************************/
